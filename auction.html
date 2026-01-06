@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IPL Auction Console - Custom Teams</title>
+  <style>
+    :root {
+      --bg-main: #050816;
+      --bg-panel: rgba(15, 23, 42, 0.9);
+      --accent-primary: #22d3ee;
+      --accent-secondary: #a855f7;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.3);
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
+      --radius: 14px;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --transition-fast: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: radial-gradient(circle at top, #0f172a 0, #020617 40%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 14px 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(20px);
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(8, 47, 73, 0.9)
+      );
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 18px 35px rgba(15, 23, 42, 0.9);
+    }
+
+    h1 {
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 14px;
+      gap: 14px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      padding: 12px 12px 10px;
+      flex: 1 1 290px;
+      min-width: 270px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -60%;
+      opacity: 0.12;
+      background:
+        radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.7), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.7), transparent 55%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .panel-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--text-muted);
+    }
+
+    label {
+      font-size: 12px;
+      display: block;
+      margin-top: 6px;
+      color: var(--text-muted);
+    }
+
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 7px 9px;
+      margin-top: 3px;
+      border-radius: 9px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      font-size: 12px;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.35);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      margin-top: 8px;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), filter var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22d3ee, #a855f7);
+      color: #0f172a;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.55);
+    }
+
+    .btn-secondary {
+      background: rgba(31, 41, 55, 0.95);
+      color: var(--text-main);
+      border: 1px solid rgba(75, 85, 99, 0.95);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(31, 41, 55, 1);
+      filter: brightness(1.08);
+    }
+
+    .btn-small {
+      font-size: 10px;
+      padding: 4px 8px;
+    }
+
+    .btn-team {
+      font-size: 10px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      margin-top: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 1);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.9);
+      background: radial-gradient(circle at 0 0, #22d3ee, #3b82f6);
+      color: #e5e7eb;
+    }
+
+    .btn-unsold {
+      background: rgba(75, 85, 99, 0.9);
+      color: #e5e7eb;
+      font-size: 10px;
+      margin-top: 4px;
+      padding: 5px 9px;
+      border-radius: 999px;
+    }
+
+    .players-list, .squad-list {
+      max-height: 290px;
+      overflow-y: auto;
+      margin-top: 8px;
+      border-top: 1px dashed var(--border-subtle);
+      padding-top: 6px;
+      font-size: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+    }
+
+    .players-list::-webkit-scrollbar,
+    .squad-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .players-list::-webkit-scrollbar-thumb,
+    .squad-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #22d3ee, #a855f7);
+      border-radius: 999px;
+    }
+
+    .player-item {
+      border-bottom: 1px dashed rgba(55, 65, 81, 0.9);
+      padding: 5px 0;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .small {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .team-logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: #020617;
+    }
+
+    .team-name {
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22d3ee;
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.9);
+    }
+
+    .status-pill {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .status-pool {
+      background: rgba(15, 118, 110, 0.15);
+      color: #6ee7b7;
+      border-color: rgba(45, 212, 191, 0.7);
+    }
+
+    .status-sold {
+      background: rgba(22, 163, 74, 0.18);
+      color: #a7f3d0;
+      border-color: rgba(52, 211, 153, 0.9);
+    }
+
+    .status-unsold {
+      background: rgba(55, 65, 81, 0.75);
+      color: #e5e7eb;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      padding: 4px 0 10px;
+      color: var(--text-muted);
+    }
+
+    .current-player-card {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(8, 47, 73, 0.95)
+      );
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.95);
+    }
+
+    .current-player-name {
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .glow {
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.9);
+    }
+
+    .tag-base {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--text-muted);
+    }
+
+    .tag-meta {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      margin-right: 4px;
+    }
+
+    .player-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: #020617;
+      margin-right: 6px;
+    }
+
+    .team-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .team-panel-compact {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 12px;
+      padding: 8px;
+      flex: 1 1 220px;
+      min-width: 210px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+    }
+
+    .remove-team-btn {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+      padding: 2px 6px;
+      font-size: 10px;
+      margin-left: 6px;
+    }
+
+    .remove-team-btn:hover {
+      background: rgba(127, 29, 29, 0.6);
+      color: #fecaca;
+      border-color: rgba(248, 113, 113, 0.9);
+    }
+
+    .editable-price {
+      cursor: pointer;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.7);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 18px; }
+      .container { padding: 10px; }
+      .panel { padding: 10px 9px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>IPL Auction Console</h1>
+    <div class="subtitle">Custom teams • Player pool • Categories • Countries • Live purse</div>
+  </header>
+
+  <div class="container">
+    <!-- Player pool + controls -->
+    <div class="panel">
+      <div class="panel-content">
+        <h2>
+          Player Pool
+          <span class="badge">QUEUE</span>
+        </h2>
+
+        <label>
+          Player Name
+          <input type="text" id="playerName" placeholder="e.g., MS Dhoni" />
+        </label>
+
+        <div class="row">
+          <div style="flex: 1;">
+            <label>
+              Base Price (cr)
+              <input type="number" id="basePrice" placeholder="e.g., 2" step="0.1" min="0" />
+            </label>
+          </div>
+          <div style="flex: 1;">
+            <label>
+              Category
+              <select id="playerCategory">
+                <option value="">Select category</option>
+                <option value="Batsman">Batsman</option>
+                <option value="Bowler">Bowler</option>
+                <option value="All-rounder">All-rounder</option>
+                <option value="WK-Batsman">WK-Batsman</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="flex: 1;">
+            <label>
+              Country
+              <input type="text" id="playerCountry" placeholder="e.g., India" />
+            </label>
+          </div>
+          <div style="flex: 1;">
+            <label>
+              Player Image URL (optional)
+              <input type="text" id="playerImage" placeholder="https://..." />
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="addPlayer()">
+          + Add to Player Pool
+        </button>
+
+        <div class="row" style="margin-top: 4px; justify-content: space-between;">
+          <span class="small" id="poolCountLabel">Total in pool: 0</span>
+          <button class="btn-secondary btn-small" onclick="setNextPlayer()">
+            ▶ Next from pool
+          </button>
+        </div>
+
+        <div class="players-list" id="playersList"></div>
+      </div>
+    </div>
+
+    <!-- Auction panel -->
+    <div class="panel">
+      <div class="panel-content">
+        <h2>
+          Auction Panel
+          <span class="badge">LIVE</span>
+        </h2>
+
+        <button class="btn-secondary btn-small" onclick="openPurseEditor()">
+          ✎ Edit team purses
+        </button>
+
+        <div class="current-player-card" id="currentPlayerCard">
+          <div class="small">Current player on bid</div>
+          <div class="flex-row" style="margin-top: 4px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <img id="currentPlayerImg" class="player-avatar" src="" alt="" style="display:none;" />
+              <div>
+                <div class="current-player-name glow" id="currentPlayerName">
+                  No player selected
+                </div>
+                <div class="small" id="currentPlayerMeta">
+                  Click “Next from pool” or “Set on bid” on any player.
+                </div>
+              </div>
+            </div>
+            <div>
+              <span class="tag-base" id="currentPlayerBase">Base: -</span>
+            </div>
+          </div>
+
+          <div class="small" style="margin-top: 6px;">
+            Final price (cr) you actually sold for:
+          </div>
+          <div class="row" style="margin-top: 2px; align-items: center;">
+            <div style="flex: 1;">
+              <input
+                type="number"
+                id="finalPriceInput"
+                placeholder="Leave empty = base price"
+                step="0.1"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <div style="margin-top: 6px;">
+            <div class="small">Sell to team:</div>
+            <div id="teamButtonsRow">
+              <!-- filled dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note" style="margin-top: 6px;">
+          Tip: Click the price in any squad to edit that player’s final price later.
+        </div>
+      </div>
+    </div>
+
+    <!-- Team manager + squads -->
+    <div class="panel" style="flex-basis: 100%; min-width: 100%;">
+      <div class="panel-content">
+        <h2>
+          Teams & Squads
+          <span class="badge">MANAGER</span>
+        </h2>
+
+        <div class="row">
+          <div style="flex:1;">
+            <label>
+              Team Name
+              <input type="text" id="teamNameInput" placeholder="e.g., CSK" />
+            </label>
+          </div>
+          <div style="flex:1;">
+            <label>
+              Starting Purse (cr)
+              <input type="number" id="teamPurseInput" placeholder="e.g., 20" step="0.1" min="0" />
+            </label>
+          </div>
+          <div style="flex:1;">
+            <label>
+              Team Logo URL (optional)
+              <input type="text" id="teamLogoInput" placeholder="https://..." />
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-secondary" onclick="addTeam()">
+          + Add Team
+        </button>
+
+        <div class="team-grid" id="teamGrid">
+          <!-- teams rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Add default teams like CSK / RCB / DC with logos, then run your home auction.
+  </div>
+
+  <script>
+    // --- State ---
+    let teams = {}; // key: teamId -> {id, name, purse, logo, players: []}
+    const players = []; // {id, name, base, status, team, price, category, country, image}
+    let currentPlayerId = null;
+    let teamCounter = 0;
+
+    // Add initial three teams
+    function addDefaultTeams() {
+      addTeamManual("CSK", 20, "https://upload.wikimedia.org/wikipedia/en/2/2f/Chennai_Super_Kings_Logo.svg");
+      addTeamManual("RCB", 20, "https://upload.wikimedia.org/wikipedia/en/3/39/Royal_Challengers_Bangalore_Logo.svg");
+      addTeamManual("DC", 20, "https://upload.wikimedia.org/wikipedia/en/4/4f/Delhi_Capitals_Logo.svg");
+    }
+
+    function formatCr(num) {
+      return num.toFixed(1);
+    }
+
+    function genTeamId(name) {
+      return name.toLowerCase().replace(/[^a-z0-9]+/g, "") + "_" + (++teamCounter);
+    }
+
+    // --- Teams ---
+    function addTeamManual(name, purse, logo) {
+      const id = genTeamId(name || "Team");
+      teams[id] = {
+        id,
+        name: name || ("Team " + teamCounter),
+        purse: isNaN(purse) ? 20 : purse,
+        logo: logo || "",
+        players: []
+      };
+      renderTeams();
+      renderTeamButtons();
+    }
+
+    function addTeam() {
+      const name = document.getElementById("teamNameInput").value.trim();
+      let purse = parseFloat(document.getElementById("teamPurseInput").value);
+      const logo = document.getElementById("teamLogoInput").value.trim();
+
+      if (!name) {
+        alert("Enter team name.");
+        return;
+      }
+      if (isNaN(purse) || purse < 0) purse = 20;
+
+      addTeamManual(name, purse, logo);
+
+      document.getElementById("teamNameInput").value = "";
+      document.getElementById("teamPurseInput").value = "";
+      document.getElementById("teamLogoInput").value = "";
+    }
+
+    function removeTeam(id) {
+      if (!confirm("Remove this team? Its players will stay marked as sold to this team in history (purse will disappear).")) {
+        return;
+      }
+      delete teams[id];
+      renderTeams();
+      renderTeamButtons();
+    }
+
+    function openPurseEditor() {
+      Object.values(teams).forEach(team => {
+        const val = prompt("Enter purse for " + team.name + " (cr):", team.purse);
+        if (val !== null && !isNaN(parseFloat(val)) && parseFloat(val) >= 0) {
+          team.purse = parseFloat(val);
+        }
+      });
+      renderTeams();
+    }
+
+    function renderTeams() {
+      const grid = document.getElementById("teamGrid");
+      grid.innerHTML = "";
+
+      Object.values(teams).forEach(team => {
+        const panel = document.createElement("div");
+        panel.className = "team-panel-compact";
+
+        const headerRow = document.createElement("div");
+        headerRow.className = "flex-row";
+
+        const left = document.createElement("div");
+        left.className = "team-header";
+        const img = document.createElement("img");
+        img.className = "team-logo";
+        if (team.logo) {
+          img.src = team.logo;
+        } else {
+          img.style.display = "none";
+        }
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "team-name";
+        nameSpan.textContent = team.name;
+
+        left.appendChild(img);
+        left.appendChild(nameSpan);
+
+        const right = document.createElement("div");
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-team-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.onclick = () => removeTeam(team.id);
+        right.appendChild(removeBtn);
+
+        headerRow.appendChild(left);
+        headerRow.appendChild(right);
+
+        const infoRow = document.createElement("div");
+        infoRow.className = "flex-row small";
+        infoRow.innerHTML =
+          "<span>Purse: <strong>" + formatCr(team.purse) +
+          " cr</strong></span><span>Players: " + team.players.length + "</span>";
+
+        const squadDiv = document.createElement("div");
+        squadDiv.className = "squad-list";
+
+        team.players.forEach((p, index) => {
+          const div = document.createElement("div");
+          div.className = "player-item";
+
+          const top = document.createElement("div");
+          top.className = "flex-row";
+
+          const leftTop = document.createElement("div");
+          leftTop.style.display = "flex";
+          leftTop.style.alignItems = "center";
+
+          if (p.image) {
+            const avatar = document.createElement("img");
+            avatar.className = "player-avatar";
+            avatar.src = p.image;
+            leftTop.appendChild(avatar);
+          }
+
+          const nameSpan2 = document.createElement("span");
+          nameSpan2.textContent = p.name;
+          leftTop.appendChild(nameSpan2);
+
+          const priceSpan = document.createElement("span");
+          priceSpan.className = "editable-price";
+          priceSpan.title = "Click to edit price";
+          priceSpan.textContent = formatCr(p.price) + " cr";
+          priceSpan.onclick = () => editSquadPlayerPrice(team.id, index);
+
+          top.appendChild(leftTop);
+          top.appendChild(priceSpan);
+
+          const bottom = document.createElement("div");
+          bottom.className = "flex-row small";
+
+          const meta = document.createElement("span");
+          meta.textContent = (p.category || "") + (p.country ? (" • " + p.country) : "");
+
+          const tag = document.createElement("span");
+          tag.className = "status-pill status-sold";
+          tag.textContent = "SOLD";
+
+          bottom.appendChild(meta);
+          bottom.appendChild(tag);
+
+          div.appendChild(top);
+          div.appendChild(bottom);
+          squadDiv.appendChild(div);
+        });
+
+        panel.appendChild(headerRow);
+        panel.appendChild(infoRow);
+        panel.appendChild(squadDiv);
+        grid.appendChild(panel);
+      });
+    }
+
+    function editSquadPlayerPrice(teamId, index) {
+      const team = teams[teamId];
+      if (!team) return;
+      const player = team.players[index];
+      const newPriceStr = prompt("Edit price for " + player.name + " (cr):", player.price);
+      if (newPriceStr === null) return;
+      const newPrice = parseFloat(newPriceStr);
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert("Enter valid price.");
+        return;
+      }
+      // adjust purse difference
+      const diff = newPrice - player.price;
+      if (team.purse < diff) {
+        alert("Not enough purse to increase this price by " + formatCr(diff) + " cr.");
+        return;
+      }
+      team.purse -= diff;
+      player.price = newPrice;
+      renderTeams();
+    }
+
+    function renderTeamButtons() {
+      const row = document.getElementById("teamButtonsRow");
+      row.innerHTML = "";
+      Object.values(teams).forEach(team => {
+        const btn = document.createElement("button");
+        btn.className = "btn-team";
+        btn.textContent = team.name;
+        btn.onclick = () => sellCurrentTo(team.id);
+        row.appendChild(btn);
+      });
+      const unsoldBtn = document.createElement("button");
+      unsoldBtn.className = "btn-unsold";
+      unsoldBtn.textContent = "Mark UNSOLD";
+      unsoldBtn.onclick = () => markCurrentUnsold();
+      row.appendChild(unsoldBtn);
+    }
+
+    // --- Players ---
+    function addPlayer() {
+      const name = document.getElementById("playerName").value.trim();
+      const base = parseFloat(document.getElementById("basePrice").value);
+      const category = document.getElementById("playerCategory").value;
+      const country = document.getElementById("playerCountry").value.trim();
+      const image = document.getElementById("playerImage").value.trim();
+
+      if (!name) {
+        alert("Enter player name.");
+        return;
+      }
+      if (isNaN(base) || base < 0) {
+        alert("Enter valid base price.");
+        return;
+      }
+
+      const id = players.length ? players[players.length - 1].id + 1 : 1;
+      players.push({
+        id,
+        name,
+        base,
+        status: "pool",
+        team: null,
+        price: base,
+        category,
+        country,
+        image
+      });
+
+      document.getElementById("playerName").value = "";
+      document.getElementById("basePrice").value = "";
+      document.getElementById("playerCategory").value = "";
+      document.getElementById("playerCountry").value = "";
+      document.getElementById("playerImage").value = "";
+
+      renderPlayers();
+    }
+
+    function renderPlayers() {
+      const listDiv = document.getElementById("playersList");
+      listDiv.innerHTML = "";
+
+      const poolCount = players.filter(p => p.status === "pool").length;
+      document.getElementById("poolCountLabel").textContent =
+        "Total in pool: " + poolCount;
+
+      players.forEach(p => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "player-item";
+
+        const topRow = document.createElement("div");
+        topRow.className = "flex-row";
+
+        const left = document.createElement("div");
+        left.style.display = "flex";
+        left.style.alignItems = "center";
+
+        if (p.image) {
+          const avatar = document.createElement("img");
+          avatar.className = "player-avatar";
+          avatar.src = p.image;
+          left.appendChild(avatar);
+        }
+
+        const nameSpan = document.createElement("span");
+        nameSpan.innerHTML = "<strong>" + p.name + "</strong>";
+        left.appendChild(nameSpan);
+
+        const right = document.createElement("div");
+        const baseTag = document.createElement("span");
+        baseTag.className = "tag-base";
+        baseTag.textContent = "Base: " + formatCr(p.base) + " cr";
+        right.appendChild(baseTag);
+        topRow.appendChild(left);
+        topRow.appendChild(right);
+
+        const bottomRow = document.createElement("div");
+        bottomRow.className = "flex-row";
+
+        const statusSpan = document.createElement("span");
+        const pill = document.createElement("span");
+        pill.className = "status-pill";
+        if (p.status === "pool") {
+          pill.classList.add("status-pool");
+          pill.textContent = "POOL";
+        } else if (p.status === "sold") {
+          pill.classList.add("status-sold");
+          pill.textContent = "Sold to " + p.teamName;
+        } else if (p.status === "unsold") {
+          pill.classList.add("status-unsold");
+          pill.textContent = "UNSOLD";
+        }
+        statusSpan.appendChild(pill);
+
+        const buttonsDiv = document.createElement("div");
+        buttonsDiv.className = "small";
+
+        if (p.category) {
+          const cTag = document.createElement("span");
+          cTag.className = "tag-meta";
+          cTag.textContent = p.category;
+          buttonsDiv.appendChild(cTag);
+        }
+        if (p.country) {
+          const coTag = document.createElement("span");
+          coTag.className = "tag-meta";
+          coTag.textContent = p.country;
+          buttonsDiv.appendChild(coTag);
+        }
+
+        const setBtn = document.createElement("button");
+        setBtn.className = "btn-secondary btn-small";
+        setBtn.textContent = "Set on bid";
+        setBtn.onclick = () => setCurrentPlayer(p.id);
+        buttonsDiv.appendChild(setBtn);
+
+        bottomRow.appendChild(statusSpan);
+        bottomRow.appendChild(buttonsDiv);
+
+        wrapper.appendChild(topRow);
+        wrapper.appendChild(bottomRow);
+        listDiv.appendChild(wrapper);
+      });
+    }
+
+    function setCurrentPlayer(id) {
+      currentPlayerId = id;
+      const p = players.find(pl => pl.id === id);
+      if (!p) return;
+
+      document.getElementById("currentPlayerName").textContent = p.name;
+      const metaParts = [];
+      if (p.category) metaParts.push(p.category);
+      if (p.country) metaParts.push(p.country);
+      document.getElementById("currentPlayerMeta").textContent =
+        metaParts.length ? metaParts.join(" • ") : "No category/country.";
+      document.getElementById("currentPlayerBase").textContent =
+        "Base: " + formatCr(p.base) + " cr";
+
+      const img = document.getElementById("currentPlayerImg");
+      if (p.image) {
+        img.src = p.image;
+        img.style.display = "block";
+      } else {
+        img.style.display = "none";
+      }
+
+      document.getElementById("finalPriceInput").value = "";
+    }
+
+    function setNextPlayer() {
+      const next = players.find(p => p.status === "pool");
+      if (!next) {
+        alert("No players left in pool!");
+        return;
+      }
+      setCurrentPlayer(next.id);
+    }
+
+    function getCurrentPlayer() {
+      if (currentPlayerId == null) {
+        alert("No current player selected.");
+        return null;
+      }
+      const p = players.find(pl => pl.id === currentPlayerId);
+      if (!p) {
+        alert("Current player not found.");
+        return null;
+      }
+      return p;
+    }
+
+    function sellCurrentTo(teamId) {
+      const team = teams[teamId];
+      if (!team) {
+        alert("Team not found.");
+        return;
+      }
+      const p = getCurrentPlayer();
+      if (!p) return;
+      if (p.status === "sold") {
+        alert("Player already sold.");
+        return;
+      }
+      if (p.status === "unsold") {
+        alert("Player marked unsold. You can’t sell.");
+        return;
+      }
+
+      const finalInput = document.getElementById("finalPriceInput");
+      let price = parseFloat(finalInput.value);
+      if (isNaN(price) || price <= 0) {
+        price = p.base;
+      }
+
+      if (team.purse < price) {
+        alert(team.name + " does not have enough purse!");
+        return;
+      }
+
+      team.purse -= price;
+      team.players.push({
+        name: p.name,
+        price,
+        category: p.category,
+        country: p.country,
+        image: p.image
+      });
+
+      p.status = "sold";
+      p.team = teamId;
+      p.teamName = team.name;
+      p.price = price;
+
+      renderTeams();
+      renderPlayers();
+      setNextPlayerIfAvailable();
+    }
+
+    function setNextPlayerIfAvailable() {
+      const next = players.find(p => p.status === "pool");
+      if (!next) {
+        currentPlayerId = null;
+        document.getElementById("currentPlayerName").textContent = "Auction complete";
+        document.getElementById("currentPlayerMeta").textContent = "No players left in pool.";
+        document.getElementById("currentPlayerBase").textContent = "Base: -";
+        document.getElementById("finalPriceInput").value = "";
+        document.getElementById("currentPlayerImg").style.display = "none";
+      } else {
+        setCurrentPlayer(next.id);
+      }
+    }
+
+    function markCurrentUnsold() {
+      const p = getCurrentPlayer();
+      if (!p) return;
+      p.status = "unsold";
+      p.team = null;
+      p.teamName = null;
+      renderPlayers();
+      setNextPlayerIfAvailable();
+    }
+
+    // --- Init ---
+    addDefaultTeams();
+    renderTeams();
+    renderTeamButtons();
+    renderPlayers();
+  </script>
+</body>
+</html>
